@@ -41,7 +41,7 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <span className="footer-brand">
-          ATC <span>Leisure</span> — Алматинский технологический колледж
+          ATC <span>Leisure</span> — Колледж Информационных Технологий
         </span>
         <span className="footer-copy">© {new Date().getFullYear()} Все права защищены</span>
       </footer>

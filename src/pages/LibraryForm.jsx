@@ -30,37 +30,58 @@ const LibraryForm = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '40px auto', padding: '20px', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-      <h2 style={{ textAlign: 'center' }}>Оформление книги</h2>
-      <p style={{ color: '#666', textAlign: 'center' }}>ID книги: <strong>{bookId}</strong></p>
-      
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input 
-          style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-          placeholder="Ваше ФИО" 
-          required 
-          onChange={(e) => setFormData({...formData, student_name: e.target.value})} 
-        />
-        <input 
-          style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-          placeholder="Группа (напр. ИС-202)" 
-          required 
-          onChange={(e) => setFormData({...formData, group_name: e.target.value})} 
-        />
-        <label>
-          Количество:
-          <input 
-            style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #ccc' }}
-            type="number" 
-            min="1" 
-            defaultValue="1" 
-            onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value)})} 
-          />
-        </label>
-        <button type="submit" style={{ padding: '12px', background: '#00d1b2', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-          Подтвердить выдачу
-        </button>
-      </form>
+    <div className="page-wrapper reveal visible" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 72px)' }}>
+      <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '40px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h2 className="section-title" style={{ fontSize: '2rem' }}>
+            <span className="text-gradient-orange">Оформление книги</span>
+          </h2>
+          <p className="section-subtitle" style={{ fontSize: '0.95rem' }}>
+            ID книги: <strong>{bookId}</strong>
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">ФИО студента (читателя)</label>
+            <input 
+              className="form-input"
+              name="student_name"
+              placeholder="Иванов Иван Иванович" 
+              required 
+              value={formData.student_name || ''}
+              onChange={(e) => setFormData({...formData, student_name: e.target.value})} 
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Группа</label>
+            <input 
+              className="form-input"
+              name="group_name"
+              placeholder="напр. ИС-202" 
+              required 
+              value={formData.group_name || ''}
+              onChange={(e) => setFormData({...formData, group_name: e.target.value})} 
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Количество экземпляров</label>
+            <input 
+              className="form-input"
+              type="number" 
+              min="1" 
+              value={formData.quantity || 1}
+              onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})} 
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px', padding: '16px', fontSize: '1rem' }}>
+            Подтвердить выдачу
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
