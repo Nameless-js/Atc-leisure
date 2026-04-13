@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { QRCodeSVG } from 'qrcode.react';
 import XLSX from 'xlsx-js-style';
 
 const Admin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   
   // Обновленные табы: 'sections', 'clubs', 'registrations', 'library'
-  const [activeTab, setActiveTab] = useState('sections');
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'sections');
+
+  // Редактирование
+  const [editingId, setEditingId] = useState(null);
 
   // Данные
   const [activities, setActivities] = useState([]);
@@ -18,14 +22,14 @@ const Admin = () => {
   const [libraryRequests, setLibraryRequests] = useState([]);
   const [qrText, setQrText] = useState('');
 
-  // Форма добавления секции
+  // Форма добавления/редактирования секции
   const [newSection, setNewSection] = useState({
-    title: '', type: 'section', description: '', schedule: '', mentor_name: '', mentor_phone: ''
+    title: '', type: 'section', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: ''
   });
 
-  // Форма добавления кружка
+  // Форма добавления/редактирования кружка
   const [newClub, setNewClub] = useState({
-    title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: ''
+    title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: ''
   });
 
   // === ФИЛЬТРЫ ===
@@ -118,25 +122,68 @@ const Admin = () => {
     e.preventDefault();
     const payload = isClub ? newClub : newSection;
     
-    console.log("Вставляем данные:", payload);
+    console.log(editingId ? "Обновляем данные:" : "Вставляем данные:", payload);
 
-    // ФИКС сохранности: передаем payload напрямую (не массивом) - supabase ^2.x поддерживает оба варианта, но так безопаснее 
-    // Также выводим точный текст ошибки если есть
-    const { data, error } = await supabase.from('activities').insert(payload).select();
+    let error, data;
+    if (editingId) {
+      const resp = await supabase.from('activities').update(payload).eq('id', editingId).select();
+      error = resp.error;
+      data = resp.data;
+    } else {
+      const resp = await supabase.from('activities').insert(payload).select();
+      error = resp.error;
+      data = resp.data;
+    }
     
     if (!error) {
-      alert(isClub ? 'Кружок успешно добавлен!' : 'Секция успешно добавлена!');
+      alert(isClub ? (editingId ? 'Кружок обновлен!' : 'Кружок успешно добавлен!') : (editingId ? 'Секция обновлена!' : 'Секция успешно добавлена!'));
+      setEditingId(null);
       if (isClub) {
-        setNewClub({ title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: '' });
+        setNewClub({ title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: '' });
       } else {
-        setNewSection({ title: '', type: 'section', description: '', schedule: '', mentor_name: '', mentor_phone: '' });
+        setNewSection({ title: '', type: 'section', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: '' });
       }
       fetchActivities(isClub ? 'club' : 'section');
     } else {
       // Если ОШИБКА RLS или другая:
-      console.error("Ошибка вставки БД:", error);
+      console.error("Ошибка БД:", error);
       alert(`Ошибка БД!\nКод: ${error.code}\nТекст: ${error.message}\nЕсли RLS включено, отключите его или создайте Policy.`);
     }
+  };
+
+  const handleEditActivity = (activity, isClub) => {
+    setEditingId(activity.id);
+    if (isClub) {
+      setNewClub({
+        title: activity.title || '',
+        type: 'club',
+        description: activity.description || '',
+        schedule: activity.schedule || '',
+        mentor_name: activity.mentor_name || '',
+        mentor_phone: activity.mentor_phone || '',
+        image_url: activity.image_url || ''
+      });
+      setActiveTab('clubs');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setNewSection({
+        title: activity.title || '',
+        type: 'section',
+        description: activity.description || '',
+        schedule: activity.schedule || '',
+        mentor_name: activity.mentor_name || '',
+        mentor_phone: activity.mentor_phone || '',
+        image_url: activity.image_url || ''
+      });
+      setActiveTab('sections');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const cancelEdit = (isClub) => {
+    setEditingId(null);
+    if (isClub) setNewClub({ title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: '' });
+    else setNewSection({ title: '', type: 'section', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: '' });
   };
 
   const handleDeleteActivity = async (id, isClub) => {
@@ -546,7 +593,7 @@ const Admin = () => {
           {renderFilterPanel('sections')}
 
           <form className="glass-card" onSubmit={(e) => handleCreateActivity(e, false)} style={{ marginBottom: '30px', borderTop: '4px solid #E87722' }}>
-            <h3 style={{ marginBottom: '20px' }}>Регистрация Новой Секции</h3>
+            <h3 style={{ marginBottom: '20px' }}>{editingId ? 'Редактирование Секции' : 'Регистрация Новой Секции'}</h3>
             <div className="cards-grid">
               <div className="form-group">
                 <label className="form-label">Название секции (например, Волейбол)</label>
@@ -565,11 +612,22 @@ const Admin = () => {
                 <input className="form-input" value={newSection.mentor_phone} onChange={e => setNewSection({...newSection, mentor_phone: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label className="form-label">Аватар карточки (URL-адрес картинки, необязательно)</label>
+                <input className="form-input" placeholder="https://..." value={newSection.image_url} onChange={e => setNewSection({...newSection, image_url: e.target.value})} />
+              </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Краткое описание секции</label>
                 <textarea className="form-input" value={newSection.description} onChange={e => setNewSection({...newSection, description: e.target.value})} rows="2" />
               </div>
             </div>
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '10px', background: '#E87722', border: 'none', boxShadow: 'none' }}>Создать секцию</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button type="submit" className="btn btn-primary" style={{ background: '#E87722', border: 'none', boxShadow: 'none' }}>
+                {editingId ? 'Сохранить изменения' : 'Создать секцию'}
+              </button>
+              {editingId && (
+                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(false)}>Отмена</button>
+              )}
+            </div>
           </form>
 
           <div className="table-wrapper">
@@ -581,7 +639,12 @@ const Admin = () => {
                     <td style={{fontWeight: 'bold', color: '#E87722'}}>{a.title}</td>
                     <td>{a.schedule}</td>
                     <td>{a.mentor_name}</td>
-                    <td><button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, false)}>Удалить</button></td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, false)}>Изменить</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, false)}>Удалить</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
                 {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>Нет созданных секций</td></tr>}
@@ -597,7 +660,7 @@ const Admin = () => {
           {renderFilterPanel('clubs')}
 
           <form className="glass-card" onSubmit={(e) => handleCreateActivity(e, true)} style={{ marginBottom: '30px', borderTop: '4px solid #9D4EDD' }}>
-            <h3 style={{ marginBottom: '20px' }}>Открытие Нового Кружка</h3>
+            <h3 style={{ marginBottom: '20px' }}>{editingId ? 'Редактирование Кружка' : 'Открытие Нового Кружка'}</h3>
             <div className="cards-grid">
               <div className="form-group">
                 <label className="form-label">Название кружка (например, Робототехника)</label>
@@ -616,11 +679,22 @@ const Admin = () => {
                 <input className="form-input" value={newClub.mentor_phone} onChange={e => setNewClub({...newClub, mentor_phone: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label className="form-label">Аватар карточки (URL-адрес картинки, необязательно)</label>
+                <input className="form-input" placeholder="https://..." value={newClub.image_url} onChange={e => setNewClub({...newClub, image_url: e.target.value})} />
+              </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Концепция кружка (описание)</label>
                 <textarea className="form-input" value={newClub.description} onChange={e => setNewClub({...newClub, description: e.target.value})} rows="2" />
               </div>
             </div>
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '10px', background: '#9D4EDD', border: 'none', boxShadow: 'none' }}>Создать кружок</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button type="submit" className="btn btn-primary" style={{ background: '#9D4EDD', border: 'none', boxShadow: 'none' }}>
+                {editingId ? 'Сохранить изменения' : 'Создать кружок'}
+              </button>
+              {editingId && (
+                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(true)}>Отмена</button>
+              )}
+            </div>
           </form>
 
           <div className="table-wrapper">
@@ -632,7 +706,12 @@ const Admin = () => {
                     <td style={{fontWeight: 'bold', color: '#9D4EDD'}}>{a.title}</td>
                     <td>{a.schedule}</td>
                     <td>{a.mentor_name}</td>
-                    <td><button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, true)}>Удалить</button></td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, true)}>Изменить</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, true)}>Удалить</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
                 {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>Нет созданных кружков</td></tr>}

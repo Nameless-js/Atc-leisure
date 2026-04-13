@@ -58,15 +58,9 @@ const Activities = ({ type }) => {
     if (data) setItems(data);
     if (error) console.error('Error fetching activities:', error);
 
-    // Если учитель — загружаем записи студентов
-    if (isTeacher) {
-      const { data: regs } = await supabase
-        .from('registrations')
-        .select('*, activities:activity_id(title, type)')
-        .order('created_at', { ascending: false });
-      if (regs) setRegistrations(regs);
-    }
-
+    // Если учитель — загружаем записи студентов для счетчика на карточке (или убираем)
+    // Мы можем убрать загрузку записей, так как детали теперь в ActivityDetail
+    // Но оставим, если хотим выводить количество
     setLoading(false);
   };
 
@@ -138,7 +132,7 @@ const Activities = ({ type }) => {
         <div className="cards-grid">
           {filteredItems.map((item, idx) => {
             const students = isTeacher ? getStudentsForActivity(item.id) : [];
-            const img = getActivityImage(item.title);
+            const img = item.image_url || getActivityImage(item.title);
 
             return (
               <div
@@ -150,7 +144,11 @@ const Activities = ({ type }) => {
                   borderColor: 'rgba(255,255,255,0.05)',
                   transition: 'all 0.4s ease',
                   animation: `slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.08}s both`,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
+                onClick={() => navigate(`/activity/${item.id}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = theme.borderHover;
                   e.currentTarget.style.transform = 'translateY(-6px)';
@@ -175,117 +173,25 @@ const Activities = ({ type }) => {
                 </h3>
 
                 {item.description && (
-                  <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '20px', flex: isTeacher ? 0 : 1, lineHeight: 1.6 }}>
-                    {item.description}
+                  <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '20px', flex: 1, lineHeight: 1.6 }}>
+                    {item.description.length > 100 ? item.description.substring(0, 100) + '...' : item.description}
                   </p>
                 )}
 
-                <div style={{ marginBottom: isTeacher ? '16px' : '24px', fontSize: '0.9rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px' }}>
-                  <p style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ color: theme.color, marginRight: '10px', fontSize: '1rem' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </span>
-                    <span style={{ color: 'var(--text-primary)' }}>{item.schedule || 'Уточняется'}</span>
-                  </p>
-                  <p style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ color: theme.color, marginRight: '10px', fontSize: '1rem' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </span>
-                    <span style={{ color: 'var(--text-primary)' }}>
-                      {item.mentor_name || 'Не назначен'} {item.mentor_phone ? <span style={{ opacity: 0.6 }}><br />{item.mentor_phone}</span> : ''}
-                    </span>
-                  </p>
-                </div>
-
-                {/* УЧИТЕЛЬ: Список записанных студентов */}
-                {isTeacher ? (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      marginBottom: '10px'
+                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center' }}>
+                    <span style={{
+                        display: 'inline-block',
+                        padding: '8px 16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        borderRadius: '20px',
+                        fontSize: '0.9rem',
+                        color: theme.color,
+                        border: `1px solid ${theme.borderHover}`,
+                        fontWeight: '500'
                     }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Записанные студенты
-                      </span>
-                      <span style={{
-                        fontSize: '0.8rem', fontWeight: 700,
-                        padding: '3px 10px', borderRadius: '9999px',
-                        background: students.length > 0 ? `${theme.color}22` : 'rgba(255,255,255,0.05)',
-                        color: students.length > 0 ? theme.color : 'var(--text-muted)',
-                      }}>
-                        {students.length}
-                      </span>
-                    </div>
-
-                    {students.length > 0 ? (
-                      <div style={{
-                        flex: 1, maxHeight: '200px', overflowY: 'auto',
-                        background: 'rgba(0,0,0,0.15)', borderRadius: '10px',
-                        padding: '8px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                      }}>
-                        {students.map((s, sidx) => (
-                          <div
-                            key={s.id}
-                            style={{
-                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                              padding: '10px 12px',
-                              borderRadius: '8px',
-                              background: sidx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
-                              transition: 'background 0.2s',
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-                            onMouseLeave={e => e.currentTarget.style.background = sidx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              {/* Маленькая картинка мяча рядом с именем */}
-                              {img && (
-                                <img src={img} alt="" className="activity-card-image-sm" />
-                              )}
-                              <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                                  {s.student_name}
-                                </div>
-                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                  {s.group_name || '—'}
-                                </div>
-                              </div>
-                            </div>
-                            <div style={{
-                              fontSize: '0.75rem', color: 'var(--text-muted)',
-                              textAlign: 'right'
-                            }}>
-                              {new Date(s.created_at).toLocaleDateString('ru-RU')}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={{
-                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '24px', background: 'rgba(0,0,0,0.1)', borderRadius: '10px',
-                        border: '1px dashed rgba(255,255,255,0.08)',
-                      }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Пока никто не записался</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  /* СТУДЕНТ: Кнопка записи */
-                  <button
-                    className="btn"
-                    style={{
-                      width: '100%', marginTop: 'auto',
-                      background: theme.btnBg, color: 'white',
-                      border: 'none', transition: 'all 0.3s'
-                    }}
-                    onMouseEnter={(e) => e.target.style.boxShadow = theme.btnHoverShadow}
-                    onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
-                    onClick={() => navigate('/register', { state: { selectedActivity: item.id } })}
-                  >
-                    Записаться
-                  </button>
-                )}
+                        Подробнее →
+                    </span>
+                </div>
               </div>
             );
           })}

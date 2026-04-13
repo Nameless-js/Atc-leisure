@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import LibraryScanner from './pages/LibraryScanner';
 import LibraryForm from './pages/LibraryForm';
 import Admin from './pages/Admin';
+import ActivityDetail from './pages/ActivityDetail';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
 
           <Route path="/sections" element={<Activities type="section" />} />
           <Route path="/clubs"    element={<Activities type="club" />} />
+          <Route path="/activity/:id" element={<ActivityDetail />} />
 
           <Route path="/register"      element={<Register />} />
           <Route path="/library"       element={<LibraryScanner />} />

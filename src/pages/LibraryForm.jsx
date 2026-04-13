@@ -19,7 +19,7 @@ const LibraryForm = () => {
     
     const { error } = await supabase
       .from('library_requests')
-      .insert([formData]);
+      .insert(formData); // Changed from [formData] to formData
 
     if (!error) {
       alert('Заявка успешно отправлена!');

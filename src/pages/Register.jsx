@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activities, setActivities] = useState([]);
   const [formData, setFormData] = useState({
     student_name: '',
@@ -18,11 +19,22 @@ const Register = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       const { data, error } = await supabase.from('activities').select('id, title, type');
-      if (data) setActivities(data);
+      if (data) {
+        let filteredData = data;
+        // Если перешли с конкретной секции/кружка, узнаем ее тип
+        const selectedId = location.state?.selectedActivity;
+        if (selectedId) {
+          const selectedAct = data.find(a => a.id === selectedId);
+          if (selectedAct) {
+            filteredData = data.filter(a => a.type === selectedAct.type);
+          }
+        }
+        setActivities(filteredData);
+      }
       if (error) console.error('Ошибка загрузки активностей:', error);
     };
     fetchActivities();
-  }, []);
+  }, [location.state]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,7 +46,7 @@ const Register = () => {
 
     const { error } = await supabase
       .from('registrations')
-      .insert([formData]);
+      .insert(formData);
 
     setLoading(false);
 
@@ -80,7 +92,7 @@ const Register = () => {
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Секция / Кружок</label>
-            <select className="form-input" name="activity_id" required value={formData.activity_id || ''} onChange={handleChange}>
+            <select className="form-input" name="activity_id" required value={formData.activity_id || location.state?.selectedActivity || ''} onChange={handleChange}>
               <option value="" disabled style={{ color: '#111', background: '#fff' }}>Выберите направление...</option>
               {activities.map((act) => (
                 <option key={act.id} value={act.id} style={{ color: '#111', background: '#fff' }}>
