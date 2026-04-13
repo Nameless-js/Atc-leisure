@@ -11,7 +11,7 @@ const Register = () => {
     group_name: '',
     curator_name: '',
     phone: '',
-    activity_id: ''
+    activity_id: location.state?.selectedActivity || ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -92,7 +92,7 @@ const Register = () => {
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Секция / Кружок</label>
-            <select className="form-input" name="activity_id" required value={formData.activity_id || location.state?.selectedActivity || ''} onChange={handleChange}>
+            <select className="form-input" name="activity_id" required value={formData.activity_id} onChange={handleChange}>
               <option value="" disabled style={{ color: '#111', background: '#fff' }}>Выберите направление...</option>
               {activities.map((act) => (
                 <option key={act.id} value={act.id} style={{ color: '#111', background: '#fff' }}>

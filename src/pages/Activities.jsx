@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 // Маппинг названий к изображениям
 const getActivityImage = (title) => {
@@ -24,6 +25,7 @@ const Activities = ({ type }) => {
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState([]);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const isTeacher = sessionStorage.getItem('adminAuth') === 'true';
   const isSport = type === 'section';
@@ -36,10 +38,10 @@ const Activities = ({ type }) => {
     bgCard: isSport
       ? 'linear-gradient(145deg, rgba(12,20,40,0.6), rgba(232, 119, 34, 0.04))'
       : 'linear-gradient(145deg, rgba(12,20,40,0.6), rgba(59, 130, 246, 0.04))',
-    title: isSport ? 'Спортивные Секции' : 'Творческие Кружки',
+    title: isSport ? t('dir.sec.title') : t('dir.club.title'),
     subtitle: isSport
-      ? (isTeacher ? 'Просмотр секций и записанных студентов' : 'Достигай новых рекордов вместе с командой')
-      : (isTeacher ? 'Просмотр кружков и записанных студентов' : 'Раскрой свой творческий и интеллектуальный потенциал'),
+      ? (isTeacher ? t('nav.teacher') : t('home.feat1.text').split('.')[0])
+      : (isTeacher ? t('nav.teacher') : t('home.feat2.text').split('.')[0]),
     btnBg: isSport ? 'linear-gradient(135deg, #E87722, #C55E10)' : 'linear-gradient(135deg, #1D5DC0, #3B82F6)',
     btnHoverShadow: isSport ? '0 8px 25px rgba(232, 119, 34, 0.4)' : '0 8px 25px rgba(29, 93, 192, 0.4)',
   };
@@ -97,7 +99,7 @@ const Activities = ({ type }) => {
             background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.3)',
             borderRadius: '9999px', fontSize: '0.85rem', color: '#0ea5e9'
           }}>
-            Режим преподавателя
+            {t('nav.teacher')}
           </div>
         )}
       </div>
@@ -107,7 +109,7 @@ const Activities = ({ type }) => {
         <input
           type="text"
           className="form-input"
-          placeholder="Поиск по названию или описанию..."
+          placeholder={isSport ? t('act.search.sec') : t('act.search.club')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -126,7 +128,7 @@ const Activities = ({ type }) => {
         </div>
       ) : filteredItems.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>Ничего не найдено</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>{isSport ? t('act.empty.sec') : t('act.empty.club')}</p>
         </div>
       ) : (
         <div className="cards-grid">
@@ -189,7 +191,7 @@ const Activities = ({ type }) => {
                         border: `1px solid ${theme.borderHover}`,
                         fontWeight: '500'
                     }}>
-                        Подробнее →
+                        {t('ui.details')} →
                     </span>
                 </div>
               </div>

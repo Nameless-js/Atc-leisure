@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 // Scroll reveal hook
 const useScrollReveal = () => {
@@ -70,6 +71,7 @@ const HeroSlider = () => {
 const Home = () => {
   const navigate = useNavigate();
   const pageRef = useScrollReveal();
+  const { t } = useLanguage();
 
   return (
     <div ref={pageRef}>
@@ -77,18 +79,16 @@ const Home = () => {
       {/* ===== HERO ===== */}
       <section className="hero-section hero-section-home">
         <div className="hero-badge">
-          Колледж Информационных Технологий — Образовательная платформа
+          {t('home.hero.badge')}
         </div>
 
         <h1 className="hero-title">
-          <span className="text-gradient">Внеучебная жизнь</span><br />
-          <span className="text-gradient-orange">без границ</span>
+          <span className="text-gradient">{t('home.hero.title1')}</span><br />
+          <span className="text-gradient-orange">{t('home.hero.title2')}</span>
         </h1>
 
         <p className="hero-subtitle">
-          ATC Leisure — единая цифровая платформа Колледжа Информационных Технологий. 
-          Записывайтесь на спортивные секции, творческие кружки и пользуйтесь умной библиотекой 
-          в один клик — без бумаг и очередей.
+          {t('home.hero.subtitle')}
         </p>
 
         <div className="hero-actions">
@@ -97,14 +97,14 @@ const Home = () => {
             style={{ fontSize: '1.05rem', padding: '16px 36px' }}
             onClick={() => navigate('/sections')}
           >
-            Смотреть секции
+            {t('home.hero.btnA')}
           </button>
           <button 
             className="btn btn-blue" 
             style={{ fontSize: '1.05rem', padding: '16px 36px' }}
             onClick={() => navigate('/clubs')}
           >
-            Смотреть кружки
+            {t('home.hero.btnB')}
           </button>
           <button 
             className="btn btn-outline" 
@@ -114,7 +114,7 @@ const Home = () => {
               else navigate('/library');
             }}
           >
-            <img src="/images/books.png" alt="Библиотека" style={{ width: '20px', height: '20px', objectFit: 'contain' }} /> Библиотека
+            <img src="/images/books.png" alt="Библиотека" style={{ width: '20px', height: '20px', objectFit: 'contain' }} /> {t('home.hero.btnLibrary')}
           </button>
         </div>
       </section>
@@ -123,14 +123,13 @@ const Home = () => {
       <section className="section" style={{ paddingTop: '40px' }}>
         <div className="section-header">
           <div className="reveal">
-            <span className="section-label section-label-orange">О платформе</span>
+            <span className="section-label section-label-orange">{t('home.about.label')}</span>
           </div>
           <h2 className="section-title reveal" style={{ transitionDelay: '0.1s' }}>
-            <span className="text-gradient-mixed">Что такое ATC Leisure?</span>
+            <span className="text-gradient-mixed">{t('home.about.title')}</span>
           </h2>
           <p className="section-subtitle reveal" style={{ transitionDelay: '0.15s' }}>
-            Цифровая экосистема для организации и управления внеучебной деятельностью 
-            студентов Колледжа Информационных Технологий
+            {t('home.about.subtitle')}
           </p>
         </div>
 
@@ -139,22 +138,16 @@ const Home = () => {
             <div className="feature-icon feature-icon-orange">
               <img src="/images/basketball.png" alt="" style={{ width: '32px', height: '32px', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.textContent = '🏀'; }} />
             </div>
-            <h3 className="feature-title">Спортивные секции</h3>
-            <p className="feature-text">
-              Баскетбол, волейбол, футбол, настольный теннис и другие спортивные направления. 
-              Тренировки проводятся под руководством опытных тренеров в спортзале колледжа.
-            </p>
+            <h3 className="feature-title">{t('home.feat1.title')}</h3>
+            <p className="feature-text">{t('home.feat1.text')}</p>
           </div>
 
           <div className="feature-card reveal stagger-2" onClick={() => navigate('/clubs')}>
             <div className="feature-icon feature-icon-blue">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="0.5"/><circle cx="17.5" cy="10.5" r="0.5"/><circle cx="8.5" cy="7.5" r="0.5"/><circle cx="6.5" cy="12" r="0.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
             </div>
-            <h3 className="feature-title">Творческие кружки</h3>
-            <p className="feature-text">
-              Робототехника, рисование, музыка, театральная студия и многое другое. 
-              Развивай свои таланты и находи единомышленников среди студентов колледжа.
-            </p>
+            <h3 className="feature-title">{t('home.feat2.title')}</h3>
+            <p className="feature-text">{t('home.feat2.text')}</p>
           </div>
 
           <div className="feature-card reveal stagger-3" onClick={() => {
@@ -164,11 +157,8 @@ const Home = () => {
             <div className="feature-icon feature-icon-teal">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
-            <h3 className="feature-title">Умная библиотека</h3>
-            <p className="feature-text">
-              QR-система для учёта книг библиотеки колледжа. 
-              Просто отсканируй код — и книга зарегистрирована за тобой. Быстро, удобно, без бумаг.
-            </p>
+            <h3 className="feature-title">{t('home.feat3.title')}</h3>
+            <p className="feature-text">{t('home.feat3.text')}</p>
           </div>
         </div>
       </section>
@@ -177,20 +167,20 @@ const Home = () => {
       <section className="section">
         <div className="stats-grid">
           <div className="stat-card reveal stagger-1">
-            <div className="stat-number" style={{ color: 'var(--color-orange)' }}>5+</div>
-            <div className="stat-label">Спортивных секций</div>
+            <div className="stat-number" style={{ color: 'var(--color-orange)' }}>{t('home.stats.1.num')}</div>
+            <div className="stat-label">{t('home.stats.1.label')}</div>
           </div>
           <div className="stat-card reveal stagger-2">
-            <div className="stat-number" style={{ color: 'var(--color-blue-light)' }}>4+</div>
-            <div className="stat-label">Творческих кружков</div>
+            <div className="stat-number" style={{ color: 'var(--color-blue-light)' }}>{t('home.stats.2.num')}</div>
+            <div className="stat-label">{t('home.stats.2.label')}</div>
           </div>
           <div className="stat-card reveal stagger-3">
-            <div className="stat-number" style={{ color: 'var(--color-accent)' }}>1.5с</div>
-            <div className="stat-label">Время брони книги</div>
+            <div className="stat-number" style={{ color: 'var(--color-accent)' }}>{t('home.stats.3.num')}</div>
+            <div className="stat-label">{t('home.stats.3.label')}</div>
           </div>
           <div className="stat-card reveal stagger-4">
-            <div className="stat-number" style={{ color: 'var(--color-orange-light)' }}>24/7</div>
-            <div className="stat-label">Доступ к платформе</div>
+            <div className="stat-number" style={{ color: 'var(--color-orange-light)' }}>{t('home.stats.4.num')}</div>
+            <div className="stat-label">{t('home.stats.4.label')}</div>
           </div>
         </div>
       </section>
@@ -199,31 +189,31 @@ const Home = () => {
       <section className="section">
         <div className="section-header">
           <div className="reveal">
-            <span className="section-label section-label-blue">Как это работает</span>
+            <span className="section-label section-label-blue">{t('home.steps.label')}</span>
           </div>
           <h2 className="section-title reveal" style={{ transitionDelay: '0.1s' }}>
-            Три простых шага
+            {t('home.steps.title')}
           </h2>
           <p className="section-subtitle reveal" style={{ transitionDelay: '0.15s' }}>
-            От выбора направления до первого занятия — всё онлайн
+            {t('home.steps.subtitle')}
           </p>
         </div>
 
         <div className="steps-grid">
           <div className="step-card reveal stagger-1">
             <div className="step-number" style={{ background: 'rgba(232, 119, 34, 0.15)', color: 'var(--color-orange)' }}>1</div>
-            <h3 className="step-title">Выбери направление</h3>
-            <p className="step-text">Просмотри доступные секции и кружки. Изучи расписание, тренера и описание каждого направления.</p>
+            <h3 className="step-title">{t('home.steps.1.title')}</h3>
+            <p className="step-text">{t('home.steps.1.text')}</p>
           </div>
           <div className="step-card reveal stagger-2">
             <div className="step-number" style={{ background: 'rgba(29, 93, 192, 0.15)', color: 'var(--color-blue-light)' }}>2</div>
-            <h3 className="step-title">Заполни заявку</h3>
-            <p className="step-text">Укажи свои данные: ФИО, группу, куратора и телефон. Заявка автоматически попадёт к преподавателю.</p>
+            <h3 className="step-title">{t('home.steps.2.title')}</h3>
+            <p className="step-text">{t('home.steps.2.text')}</p>
           </div>
           <div className="step-card reveal stagger-3">
             <div className="step-number" style={{ background: 'rgba(14, 165, 233, 0.15)', color: 'var(--color-accent)' }}>3</div>
-            <h3 className="step-title">Приходи на занятие</h3>
-            <p className="step-text">После одобрения заявки — приходи по расписанию. Все данные хранятся в электронном журнале колледжа.</p>
+            <h3 className="step-title">{t('home.steps.3.title')}</h3>
+            <p className="step-text">{t('home.steps.3.text')}</p>
           </div>
         </div>
       </section>
@@ -232,10 +222,10 @@ const Home = () => {
       <section className="section">
         <div className="section-header">
           <div className="reveal">
-            <span className="section-label section-label-orange">Преимущества</span>
+            <span className="section-label section-label-orange">{t('home.adv.label')}</span>
           </div>
           <h2 className="section-title reveal" style={{ transitionDelay: '0.1s' }}>
-            Почему <span className="text-gradient-orange">ATC Leisure</span>?
+            {t('home.adv.title1')} <span className="text-gradient-orange">{t('home.adv.title2')}</span>
           </h2>
         </div>
 
@@ -244,44 +234,32 @@ const Home = () => {
             <div className="feature-icon feature-icon-orange">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <h3 className="feature-title">Экономия времени</h3>
-            <p className="feature-text">
-              Никаких очередей к куратору и бумажных заявлений. 
-              Запись на секцию или кружок занимает меньше минуты через платформу.
-            </p>
+            <h3 className="feature-title">{t('home.adv1.title')}</h3>
+            <p className="feature-text">{t('home.adv1.text')}</p>
           </div>
 
           <div className="feature-card reveal stagger-2" style={{ cursor: 'default' }}>
             <div className="feature-icon feature-icon-blue">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <h3 className="feature-title">Удобство для преподавателей</h3>
-            <p className="feature-text">
-              Электронный журнал записей, экспорт данных в Excel, 
-              фильтрация по секциям и датам — всё под рукой в админ-панели.
-            </p>
+            <h3 className="feature-title">{t('home.adv2.title')}</h3>
+            <p className="feature-text">{t('home.adv2.text')}</p>
           </div>
 
           <div className="feature-card reveal stagger-3" style={{ cursor: 'default' }}>
             <div className="feature-icon feature-icon-teal">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             </div>
-            <h3 className="feature-title">QR-система библиотеки</h3>
-            <p className="feature-text">
-              Генерация и сканирование QR-кодов для книг. 
-              Преподаватель создаёт код, студент сканирует — учёт ведётся автоматически.
-            </p>
+            <h3 className="feature-title">{t('home.adv3.title')}</h3>
+            <p className="feature-text">{t('home.adv3.text')}</p>
           </div>
 
           <div className="feature-card reveal stagger-4" style={{ cursor: 'default' }}>
             <div className="feature-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', color: '#8b5cf6' }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h3 className="feature-title">Безопасность данных</h3>
-            <p className="feature-text">
-              Все данные студентов защищены и хранятся на серверах Supabase. 
-              Доступ к админ-панели только по паролю преподавателя.
-            </p>
+            <h3 className="feature-title">{t('home.adv4.title')}</h3>
+            <p className="feature-text">{t('home.adv4.text')}</p>
           </div>
         </div>
       </section>
@@ -290,13 +268,13 @@ const Home = () => {
       <section className="section">
         <div className="section-header">
           <div className="reveal">
-            <span className="section-label section-label-blue">Направления</span>
+            <span className="section-label section-label-blue">{t('home.dir.label')}</span>
           </div>
           <h2 className="section-title reveal" style={{ transitionDelay: '0.1s' }}>
-            Чем заняться в <span className="text-gradient-blue">колледже</span>?
+            {t('home.dir.title1')} <span className="text-gradient-blue">{t('home.dir.title2')}</span>
           </h2>
           <p className="section-subtitle reveal" style={{ transitionDelay: '0.15s' }}>
-            Более 9 направлений для активного развития студентов
+            {t('home.dir.subtitle')}
           </p>
         </div>
 
@@ -309,15 +287,15 @@ const Home = () => {
             padding: '32px',
           }}>
             <h3 style={{ marginBottom: '20px', color: 'var(--color-orange)' }}>
-              Спортивные секции
+              {t('dir.sec.title')}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {[
-                { name: 'Баскетбол', desc: 'Командная игра — тренировки 3 раза в неделю', img: '/images/basketball.png' },
-                { name: 'Футбол', desc: 'Мини-футбол для всех курсов', img: '/images/football.png' },
-                { name: 'Волейбол', desc: 'Секция волейбола — сборная колледжа', img: '/images/volleyball.png' },
-                { name: 'Настольный теннис', desc: 'Индивидуальные и парные игры', img: '/images/tennis.png' },
-                { name: 'Шахматы', desc: 'Интеллектуальный спорт — турниры колледжа', img: '/images/chess.png' },
+                { name: t('dir.sec.1.name'), desc: t('dir.sec.1.desc'), img: '/images/basketball.png' },
+                { name: t('dir.sec.2.name'), desc: t('dir.sec.2.desc'), img: '/images/football.png' },
+                { name: t('dir.sec.3.name'), desc: t('dir.sec.3.desc'), img: '/images/volleyball.png' },
+                { name: t('dir.sec.4.name'), desc: t('dir.sec.4.desc'), img: '/images/tennis.png' },
+                { name: t('dir.sec.5.name'), desc: t('dir.sec.5.desc'), img: '/images/chess.png' },
               ].map((s, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: '14px',
@@ -348,7 +326,7 @@ const Home = () => {
               style={{ marginTop: '20px', width: '100%' }}
               onClick={() => navigate('/sections')}
             >
-              Все секции →
+              {t('home.dir.btn1')}
             </button>
           </div>
 
@@ -360,14 +338,14 @@ const Home = () => {
             padding: '32px',
           }}>
             <h3 style={{ marginBottom: '20px', color: 'var(--color-blue-light)' }}>
-              Творческие кружки
+              {t('dir.club.title')}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {[
-                { name: 'Робототехника', desc: 'Arduino, 3D-печать, программирование', img: '/images/robot.png' },
-                { name: 'Рисование', desc: 'Живопись, графика, цифровое искусство', img: '/images/palette.png' },
-                { name: 'Музыка', desc: 'Гитара, вокал, ритмическая секция', img: '/images/music.png' },
-                { name: 'Театральная студия', desc: 'Актёрское мастерство, сценическая речь', img: '/images/teatr.png' },
+                { name: t('dir.club.1.name'), desc: t('dir.club.1.desc'), img: '/images/robot.png' },
+                { name: t('dir.club.2.name'), desc: t('dir.club.2.desc'), img: '/images/palette.png' },
+                { name: t('dir.club.3.name'), desc: t('dir.club.3.desc'), img: '/images/music.png' },
+                { name: t('dir.club.4.name'), desc: t('dir.club.4.desc'), img: '/images/teatr.png' },
               ].map((s, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: '14px',
@@ -402,7 +380,7 @@ const Home = () => {
               style={{ marginTop: '20px', width: '100%' }}
               onClick={() => navigate('/clubs')}
             >
-              Все кружки →
+              {t('home.dir.btn2')}
             </button>
           </div>
         </div>
@@ -412,20 +390,20 @@ const Home = () => {
       <section className="section" style={{ paddingBottom: '60px' }}>
         <div className="cta-section reveal-scale">
           <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', marginBottom: '16px' }}>
-            Готов <span className="text-gradient-orange">развиваться</span>? 
+            {t('home.cta.title1')} <span className="text-gradient-orange">{t('home.cta.title2')}</span> 
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Присоединяйся к внеучебной жизни Колледжа Информационных Технологий прямо сейчас
+            {t('home.cta.subtitle')}
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" style={{ fontSize: '1.05rem', padding: '16px 36px' }} onClick={() => navigate('/sections')}>
-              Начать
+              {t('home.cta.btn1')}
             </button>
             <button className="btn btn-outline" style={{ fontSize: '1.05rem', padding: '16px 36px' }} onClick={() => {
               if (sessionStorage.getItem('adminAuth') === 'true') navigate('/admin', { state: { tab: 'library' } });
               else navigate('/library');
             }}>
-              Перейти в библиотеку
+              {t('home.cta.btn2')}
             </button>
           </div>
         </div>

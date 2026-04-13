@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -36,12 +38,31 @@ const Header = () => {
 
       {/* Nav */}
       <nav style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <select 
+          value={language} 
+          onChange={(e) => setLanguage(e.target.value)}
+          style={{
+            background: 'transparent',
+            color: 'var(--text-primary)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '4px',
+            padding: '4px 8px',
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            outline: 'none'
+          }}
+        >
+          <option value="ru" style={{color: '#000'}}>RU</option>
+          <option value="kz" style={{color: '#000'}}>KZ</option>
+          <option value="en" style={{color: '#000'}}>EN</option>
+        </select>
+
         {!isHome && !isAdmin && (
           <button
             className="btn btn-outline btn-sm"
             onClick={() => navigate('/')}
           >
-            ← Главная
+            ← {t('nav.main')}
           </button>
         )}
 
@@ -66,7 +87,7 @@ const Header = () => {
             className="btn btn-primary btn-sm"
             onClick={() => navigate('/admin')}
           >
-            🔐 Я преподаватель
+            🔐 {t('nav.teacher')}
           </button>
         )}
       </nav>

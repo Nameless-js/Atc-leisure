@@ -234,6 +234,14 @@ const Admin = () => {
     return applyDateFilter(filtered);
   }, [registrations, filterActivity, filterDateFrom, filterDateTo]);
 
+  const filteredLibraryRequests = useMemo(() => {
+    let filtered = [...libraryRequests];
+    if (filterActivity !== 'all') {
+      filtered = filtered.filter(r => r.book_id === filterActivity || r.book_name === filterActivity);
+    }
+    return applyDateFilter(filtered);
+  }, [libraryRequests, filterActivity, filterDateFrom, filterDateTo]);
+
   // === СТИЛИЗОВАННЫЙ ЭКСПОРТ В EXCEL ===
   const headerStyle = (color) => ({
     font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 12, name: 'Arial' },
@@ -395,6 +403,27 @@ const Admin = () => {
     }, 'Журнал_записей.xlsx', '📋 Электронный журнал записей — КИТ', '0284C7');
   };
 
+  const handleExportLibrary = () => {
+    const rows = filteredLibraryRequests.map(r => ({
+      student_name: r.student_name,
+      group_name: r.group_name || '',
+      book_name: r.book_name || '',
+      book_id: r.book_id || '',
+      quantity: r.quantity || 1,
+      date: new Date(r.created_at).toLocaleString('ru-RU'),
+      status: r.is_returned ? 'Возвращена' : 'На руках'
+    }));
+    exportToExcel(rows, {
+      student_name: 'Студент',
+      group_name: 'Группа',
+      book_name: 'Название Книги',
+      book_id: 'Код (ID)',
+      quantity: 'Кол-во',
+      date: 'Дата и Время',
+      status: 'Статус'
+    }, 'История_выдачи_книг.xlsx', '📚 Журнал библиотеки — КИТ', '10b981');
+  };
+
   // === СТИЛИ ФИЛЬТР-ПАНЕЛИ ===
   const filterPanelStyle = {
     display: 'flex',
@@ -483,14 +512,18 @@ const Admin = () => {
 
   // === РЕНДЕР ФИЛЬТР-ПАНЕЛИ ===
   const renderFilterPanel = (type) => {
-    const items = type === 'registrations' ? allActivities : activities;
+    let items = activities;
+    if (type === 'registrations') items = allActivities;
+    else if (type === 'library_history') items = libraryRequests.map(r => ({title: r.book_name || r.book_id}));
+    
     const labels = {
       sections: { select: 'Секция', color: '#E87722', handler: handleExportSections },
       clubs: { select: 'Кружок', color: '#9D4EDD', handler: handleExportClubs },
       registrations: { select: 'Направление', color: '#0284c7', handler: handleExportRegistrations },
+      library_history: { select: 'Название / Код книги', color: '#10b981', handler: handleExportLibrary },
     };
     const cfg = labels[type];
-    const uniqueTitles = [...new Set(items.map(a => a.title))].sort();
+    const uniqueTitles = [...new Set(items.map(a => a.title).filter(Boolean))].sort();
 
     return (
       <div style={filterPanelStyle}>
@@ -758,70 +791,94 @@ const Admin = () => {
 
       {/* ВКЛАДКА: БИБЛИОТЕКА И QR */}
       {activeTab === 'library' && (
-        <div className="glass-card">
-          <h3 style={{ marginBottom: '20px' }}>Библиотека: Генератор QR</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-            Превратите код книги в QR для наклейки. Студенты сканируют такие наклейки на главной странице в 1 клик.
-          </p>
-          <div className="form-group" style={{ maxWidth: '400px' }}>
-            <input 
-              type="text" 
-              className="form-input" 
-              placeholder="Например: ISBN-978-0132350884" 
-              value={qrText}
-              onChange={e => setQrText(e.target.value)}
-            />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+          <div className="glass-card">
+            <h3 style={{ marginBottom: '20px' }}>Генератор QR (Для Книги)</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+              Превратите код книги в QR для наклейки. Студенты сканируют такие наклейки, оформляя конкретную книгу.
+            </p>
+            <div className="form-group" style={{ maxWidth: '100%' }}>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="Например: ISBN-978-0132350884" 
+                value={qrText}
+                onChange={e => setQrText(e.target.value)}
+              />
+            </div>
+            
+            {qrText && (
+              <div className="qr-container">
+                <QRCodeSVG value={qrText} size={220} level="Q" includeMargin={true} />
+                <p style={{ marginTop: '16px', fontWeight: 'bold', color: '#1a1a1a', letterSpacing: '2px', wordBreak: 'break-all' }}>{qrText}</p>
+              </div>
+            )}
           </div>
           
-          {qrText && (
-            <div className="qr-container">
-              <QRCodeSVG value={qrText} size={220} level="Q" includeMargin={true} />
-              <p style={{ marginTop: '16px', fontWeight: 'bold', color: '#1a1a1a', letterSpacing: '2px' }}>{qrText}</p>
-            </div>
-          )}
+          <div className="glass-card">
+             <h3 style={{ marginBottom: '20px' }}>QR Библиотеки (Общий)</h3>
+             <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+               Распечатайте этот QR для сканера на входе или кафедре. Он ведет на главную страницу библиотеки со сканером.
+             </p>
+             <div className="qr-container">
+                <QRCodeSVG value={window.location.origin + '/library'} size={220} level="Q" includeMargin={true} />
+                <p style={{ marginTop: '16px', fontWeight: 'bold', color: '#1a1a1a', letterSpacing: '1px' }}>Общий вход в сканер</p>
+             </div>
+          </div>
         </div>
       )}
 
       {/* ВКЛАДКА: ИСТОРИЯ БИБЛИОТЕКИ */}
       {activeTab === 'library_history' && (
-        <div className="glass-card" style={{ padding: '30px' }}>
-          <h3 style={{ marginBottom: '20px' }}>История выдачи книг</h3>
-          <div className="table-wrapper">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ФИО</th>
-                  <th>Группа</th>
-                  <th>Код Книги (Кол-во)</th>
-                  <th>Дата и Время</th>
-                  <th>Статус</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {libraryRequests.map(r => (
-                  <tr key={r.id}>
-                    <td style={{fontWeight: 'bold'}}>{r.student_name}</td>
-                    <td>{r.group_name}</td>
-                    <td>{r.book_id} {r.quantity > 1 ? `(${r.quantity} шт.)` : ''}</td>
-                    <td>{new Date(r.created_at).toLocaleString('ru-RU')}</td>
-                    <td>
-                      {r.is_returned ? 
-                        <span style={{background: 'rgba(0, 209, 178, 0.1)', color: '#00d1b2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>Возвращена</span> : 
-                        <span style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>На руках</span>
-                      }
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-sm" style={{ background: 'rgba(0, 209, 178, 0.2)', color: '#00d1b2', border: '1px solid rgba(0, 209, 178, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, true)}>Вернул</button>
-                        <button className="btn btn-sm" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, false)}>Отмена / На руках</button>
-                      </div>
-                    </td>
+        <div>
+          {renderFilterPanel('library_history')}
+          
+          <div className="glass-card" style={{ padding: '30px' }}>
+            <h3 style={{ marginBottom: '20px' }}>История выдачи книг</h3>
+            <div className="table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>ФИО</th>
+                    <th>Группа</th>
+                    <th>Книга / Код</th>
+                    <th>Кол-во</th>
+                    <th>Дата и Время</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
                   </tr>
-                ))}
-                {libraryRequests.length === 0 && <tr><td colSpan="6" style={{textAlign: 'center'}}>Нет записей о выдаче книг</td></tr>}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredLibraryRequests.map(r => (
+                    <tr key={r.id}>
+                      <td style={{fontWeight: 'bold'}}>{r.student_name}</td>
+                      <td>{r.group_name}</td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontWeight: '500' }}>{r.book_name || 'Без названия'}</span>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{r.book_id}</span>
+                        </div>
+                      </td>
+                      <td>{r.quantity} шт.</td>
+                      <td>{new Date(r.created_at).toLocaleString('ru-RU')}</td>
+                      <td>
+                        {r.is_returned ? 
+                          <span style={{background: 'rgba(0, 209, 178, 0.1)', color: '#00d1b2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>Возвращена</span> : 
+                          <span style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>На руках</span>
+                        }
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button className="btn btn-sm" style={{ background: 'rgba(0, 209, 178, 0.2)', color: '#00d1b2', border: '1px solid rgba(0, 209, 178, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, true)}>Вернул</button>
+                          <button className="btn btn-sm" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, false)}>Отмена</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredLibraryRequests.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center'}}>Нет записей о выдаче книг</td></tr>}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

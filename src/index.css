@@ -718,6 +718,17 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 0 0 3px rgba(232, 119, 34, 0.08);
 }
 
+/* Hide spin buttons for number inputs */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* ============================
    GRID / TABS / TABLES
    ============================ */

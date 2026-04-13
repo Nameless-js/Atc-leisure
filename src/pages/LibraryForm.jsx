@@ -8,24 +8,40 @@ const LibraryForm = () => {
   const bookId = searchParams.get('bookId'); // Тянем ID книги из URL
 
   const [formData, setFormData] = useState({
-    student_name: '',
-    group_name: '',
-    quantity: 1,
-    book_id: bookId
+    student_name: localStorage.getItem('last_student_name') || '',
+    group_name: localStorage.getItem('last_group_name') || '',
+    book_name_input: '',
+    quantity: 1
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const payload = {
+      student_name: formData.student_name,
+      group_name: formData.group_name,
+      // Вшиваем название книги прямо в book_id, чтобы не требовать новой колонки в БД
+      book_id: formData.book_name_input ? `${formData.book_name_input} (Код: ${bookId})` : bookId,
+      quantity: formData.quantity || 1
+    };
+
     const { error } = await supabase
       .from('library_requests')
-      .insert(formData); // Changed from [formData] to formData
+      .insert(payload); // Changed from [formData] to formData
 
     if (!error) {
       alert('Заявка успешно отправлена!');
+      localStorage.setItem('last_student_name', formData.student_name);
+      localStorage.setItem('last_group_name', formData.group_name);
       navigate('/');
     } else {
-      alert('Ошибка при отправке: ' + error.message);
+      if (error.message.includes('invalid input syntax for type uuid')) {
+        alert('Ошибка Базы Данных: Вы использовали текст вместо ID формата UUID.\n\nПожалуйста, зайдите в панель Supabase -> Table Editor -> "library_requests" и измените тип колонки "book_id" с "uuid" на "text". Это позволит использовать любые коды книг.');
+      } else if (error.message.includes('column "book_name" of relation')) {
+        alert('Ошибка Базы Данных: Отсутствует колонка "book_name".\n\nВ таблице "library_requests" нужно добавить колонку "book_name" (тип text), чтобы сохранялось название книги.');
+      } else {
+        alert('Ошибка при отправке: ' + error.message);
+      }
     }
   };
 
@@ -67,13 +83,25 @@ const LibraryForm = () => {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Название книги</label>
+            <input 
+              className="form-input"
+              name="book_name_input"
+              placeholder="Понятное название (например, Физика 10 класс)" 
+              required 
+              value={formData.book_name_input || ''}
+              onChange={(e) => setFormData({...formData, book_name_input: e.target.value})} 
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Количество экземпляров</label>
             <input 
               className="form-input"
               type="number" 
               min="1" 
-              value={formData.quantity || 1}
-              onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})} 
+              value={formData.quantity}
+              onChange={(e) => setFormData({...formData, quantity: e.target.value === '' ? '' : parseInt(e.target.value) || 1})} 
             />
           </div>
 
