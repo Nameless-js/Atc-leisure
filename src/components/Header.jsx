@@ -33,7 +33,7 @@ const Header = () => {
     <header className="header" style={{ boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.5)' : 'none' }}>
       {/* Logo */}
       <div className="header-logo" onClick={() => navigate('/')} role="button" tabIndex={0}>
-        ATC <span>Leisure</span>
+         <span>EduSpace</span>
       </div>
 
       {/* Nav */}

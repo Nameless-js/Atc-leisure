@@ -797,7 +797,7 @@ const Admin = () => {
           <div className="glass-card">
             <h3 style={{ marginBottom: '20px' }}>{t('admin.tab.library')}</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              Превратите код книги в QR для наклейки. Студенты сканируют такие наклейки, оформляя конкретную книгу.
+              Превратите код книги в QR для наклейки. Учащиеся сканируют такие наклейки, оформляя конкретную книгу.
             </p>
             <div className="form-group" style={{ maxWidth: '100%' }}>
               <input 

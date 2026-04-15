@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-dotenv.config({ path: 'C:/Users/Пользователь/Desktop/atcc/Atc-leisure/.env' });
+dotenv.config({ path: 'C:/Users/Пользователь/Desktop/atcc/EduSpace/.env' });
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;

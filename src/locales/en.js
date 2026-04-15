@@ -4,26 +4,26 @@ export const en = {
   "nav.clubs": "Clubs",
   "nav.teacher": "I'm a Teacher",
 
-  "home.hero.badge": "College of Information Technologies — Educational Platform",
+  "home.hero.badge": "School resource management information system (library, clubs and sections)",
   "home.hero.title1": "Live Your Student Life",
   "home.hero.title2": "To The Maximum",
-  "home.hero.subtitle": "ATC Leisure is a unified digital platform of the College of Information Technologies. Sign up for sports sections, creative clubs, and use the smart library in one click — no paperwork or queues.",
+  "home.hero.subtitle": "EduSpace is a unified digital platform of theSchool resource management information system (library, clubs and sections).",
   "home.hero.btnA": "View Sections",
   "home.hero.btnB": "View Clubs",
   "home.hero.btnLibrary": "Library",
 
   "home.about.label": "About Platform",
-  "home.about.title": "What is ATC Leisure?",
+  "home.about.title": "What isEduSpace ?",
   "home.about.subtitle": "A digital ecosystem for organizing and managing extracurricular activities of KIT students",
   
   "home.feat1.title": "Sports Sections",
-  "home.feat1.text": "Basketball, volleyball, football, table tennis, and other sports. Training is held under the guidance of experienced coaches in the college gym.",
+  "home.feat1.text": "Basketball, volleyball, football, table tennis, and other sports. Training is held under the guidance of experienced coaches in the school gym.",
   
   "home.feat2.title": "Creative Clubs",
   "home.feat2.text": "Robotics, drawing, music, theater studio, and much more. Develop your talents and find like-minded people.",
   
   "home.feat3.title": "Smart Library",
-  "home.feat3.text": "QR system for accounting books of the college library. Scan the code — and the book is registered to you. Fast, convenient, paperless.",
+  "home.feat3.text": "QR system for accounting books of the School library. Scan the code — and the book is registered to you. Fast, convenient, paperless.",
 
   "home.stats.1.num": "5+",
   "home.stats.1.label": "Sports Sections",
@@ -46,7 +46,7 @@ export const en = {
 
   "home.adv.label": "Advantages",
   "home.adv.title1": "Why",
-  "home.adv.title2": "ATC Leisure?",
+  "home.adv.title2": "EduSpace?",
   
   "home.adv1.title": "Saves Time",
   "home.adv1.text": "No queues to the curator and paper applications. Registration takes less than a minute.",
@@ -59,7 +59,7 @@ export const en = {
 
   "home.dir.label": "Directions",
   "home.dir.title1": "What to do in",
-  "home.dir.title2": "college?",
+  "home.dir.title2": "school?",
   "home.dir.subtitle": "More than 9 directions for active student development",
   "home.dir.btn1": "All Sections →",
   "home.dir.btn2": "All Clubs →",
@@ -67,9 +67,9 @@ export const en = {
   "dir.sec.title": "Sports Sections",
   "dir.sec.1.name": "Basketball", "dir.sec.1.desc": "Team game — training 3 times a week",
   "dir.sec.2.name": "Football", "dir.sec.2.desc": "Mini-football for all courses",
-  "dir.sec.3.name": "Volleyball", "dir.sec.3.desc": "Volleyball section — college team",
+  "dir.sec.3.name": "Volleyball", "dir.sec.3.desc": "Volleyball section — school team",
   "dir.sec.4.name": "Table Tennis", "dir.sec.4.desc": "Individual and doubles games",
-  "dir.sec.5.name": "Chess", "dir.sec.5.desc": "Intellectual sport — college tournaments",
+  "dir.sec.5.name": "Chess", "dir.sec.5.desc": "Intellectual sport — school tournaments",
 
   "dir.club.title": "Creative Clubs",
   "dir.club.1.name": "Robotics", "dir.club.1.desc": "Arduino, 3D printing, programming",
@@ -79,7 +79,7 @@ export const en = {
 
   "home.cta.title1": "Ready to",
   "home.cta.title2": "develop?",
-  "home.cta.subtitle": "Join the extracurricular life of the College of Information Technologies right now",
+  "home.cta.subtitle": "Join the extracurricular life of the School right now",
   "home.cta.btn1": "Get Started",
   "home.cta.btn2": "Go to Library",
 

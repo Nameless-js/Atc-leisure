@@ -47,7 +47,7 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <span className="footer-brand">
-          ATC <span>Leisure</span> — {t('home.hero.badge').split(' — ')[0]}
+           <span>EduSpace</span> — {t('home.hero.badge').split(' — ')[0]}
         </span>
         <span className="footer-copy">© {new Date().getFullYear()} {t('footer.rights')}</span>
       </footer>
