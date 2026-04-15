@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import * as XLSX from 'xlsx-js-style';
+import { useLanguage } from '../context/LanguageContext';
 
 const getActivityImage = (title) => {
   if (!title) return null;
@@ -24,6 +25,7 @@ const ActivityDetail = () => {
   const [activity, setActivity] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   const isTeacher = sessionStorage.getItem('adminAuth') === 'true';
 
@@ -55,19 +57,19 @@ const ActivityDetail = () => {
   };
 
   const handleExportExcel = () => {
-    if (students.length === 0) { alert('Нет данных для экспорта'); return; }
+    if (students.length === 0) { alert(t('ui.not_found')); return; }
 
     const wsData = [];
     
     // Заголовок
-    wsData.push([{ v: `Записанные студенты: ${activity?.title}`, s: { font: { bold: true, sz: 16 } } }]);
+    wsData.push([{ v: `${t('details.student_list')}: ${activity?.title}`, s: { font: { bold: true, sz: 16 } } }]);
     wsData.push([]);
     
     // Колонки
     wsData.push([
-      { v: 'Студент', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
-      { v: 'Группа', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
-      { v: 'Дата записи', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } }
+      { v: t('register.student'), s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+      { v: t('register.group'), s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+      { v: t('admin.filter.date_from'), s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } }
     ]);
     
     // Данные
@@ -84,8 +86,8 @@ const ActivityDetail = () => {
     ws['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 15 }];
     
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Студенты');
-    XLSX.writeFile(wb, `Список_${activity?.title.replace(/\s+/g, '_')}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, t('register.activity'));
+    XLSX.writeFile(wb, `List_${activity?.title.replace(/\s+/g, '_')}.xlsx`);
   };
 
   if (loading) {
@@ -100,8 +102,8 @@ const ActivityDetail = () => {
   if (!activity) {
     return (
       <div className="container" style={{ textAlign: 'center', marginTop: '100px' }}>
-        <h2>Активность не найдена</h2>
-        <button className="btn" onClick={() => navigate(-1)}>Назад</button>
+        <h2>{t('ui.not_found')}</h2>
+        <button className="btn" onClick={() => navigate(-1)}>{t('ui.back')}</button>
       </div>
     );
   }
@@ -114,7 +116,7 @@ const ActivityDetail = () => {
   return (
     <div className="page-wrapper container" style={{ position: 'relative', zIndex: 1 }}>
       <button className="btn btn-outline btn-sm" onClick={() => navigate(-1)} style={{ marginBottom: '20px' }}>
-        ← Назад
+        ← {t('ui.back')}
       </button>
 
       <div className="glass-card" style={{ 
@@ -143,25 +145,25 @@ const ActivityDetail = () => {
           <div style={{ flex: '1 1 300px' }}>
             <h1 style={{ fontSize: '2.5rem', color: themeColor, marginBottom: '10px' }}>{activity.title}</h1>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '25px', lineHeight: '1.6' }}>
-              {activity.description || 'Описание отсутствует.'}
+              {activity.description || t('ui.not_found')}
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>Расписание</div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{activity.schedule || 'Уточняется'}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>{t('details.schedule')}</div>
+                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{activity.schedule || t('ui.not_found')}</div>
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>Длительность</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>{t('details.duration')}</div>
                 <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{duration}</div>
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>Преподаватель / Тренер</div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{activity.mentor_name || 'Не назначен'}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>{t('details.mentor')}</div>
+                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{activity.mentor_name || t('ui.not_found')}</div>
                 {activity.mentor_phone && <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{activity.mentor_phone}</div>}
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>Количество участников</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>{t('details.participants')}</div>
                 <div style={{ fontSize: '1.5rem', color: themeColor, fontWeight: 'bold' }}>{students.length}</div>
               </div>
             </div>
@@ -178,7 +180,7 @@ const ActivityDetail = () => {
                 }}
                 onClick={() => navigate('/register', { state: { selectedActivity: activity.id } })}
               >
-                Записаться
+                {t('ui.register')}
               </button>
             )}
           </div>
@@ -189,13 +191,13 @@ const ActivityDetail = () => {
       {isTeacher && (
         <div className="glass-card" style={{ marginTop: '30px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-            <h3 style={{ margin: 0 }}>Список записанных студентов</h3>
+            <h3 style={{ margin: 0 }}>{t('details.student_list')}</h3>
             <button 
               className="btn btn-outline"
               onClick={handleExportExcel}
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              📥 Экспорт в Excel
+              📥 {t('ui.export_excel')}
             </button>
           </div>
 
@@ -204,9 +206,9 @@ const ActivityDetail = () => {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>ФИО Студента</th>
-                    <th>Группа</th>
-                    <th>Дата записи</th>
+                    <th>{t('register.student')}</th>
+                    <th>{t('register.group')}</th>
+                    <th>{t('admin.filter.date_from')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -222,7 +224,7 @@ const ActivityDetail = () => {
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(0,0,0,0.1)', borderRadius: '12px' }}>
-              <p style={{ color: 'var(--text-muted)' }}>Пока никто не записался</p>
+              <p style={{ color: 'var(--text-muted)' }}>{t('details.empty_students')}</p>
             </div>
           )}
         </div>

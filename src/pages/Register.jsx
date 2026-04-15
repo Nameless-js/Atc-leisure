@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const [activities, setActivities] = useState([]);
   const [formData, setFormData] = useState({
     student_name: '',
@@ -31,7 +33,7 @@ const Register = () => {
         }
         setActivities(filteredData);
       }
-      if (error) console.error('Ошибка загрузки активностей:', error);
+      if (error) console.error('Error fetching activities:', error);
     };
     fetchActivities();
   }, [location.state]);
@@ -51,10 +53,10 @@ const Register = () => {
     setLoading(false);
 
     if (error) {
-      alert('Ошибка при записи. Проверь консоль.');
+      alert(t('ui.not_found'));
       console.error(error);
     } else {
-      alert('Успешно! Ты записан.');
+      alert(t('msg.success.register'));
       navigate('/'); // Возвращаем на главную
     }
   };
@@ -64,46 +66,46 @@ const Register = () => {
       <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <h2 className="section-title" style={{ fontSize: '2rem' }}>
-            <span className="text-gradient-orange">Регистрация</span>
+            <span className="text-gradient-orange">{t('register.title')}</span>
           </h2>
-          <p className="section-subtitle" style={{ fontSize: '0.95rem' }}>Заполните форму для записи в секцию или кружок</p>
+          <p className="section-subtitle" style={{ fontSize: '0.95rem' }}>{t('register.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">ФИО студента</label>
+            <label className="form-label">{t('register.student')}</label>
             <input className="form-input" name="student_name" placeholder="Иванов Иван Иванович" required value={formData.student_name || ''} onChange={handleChange} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Группа</label>
+            <label className="form-label">{t('register.group')}</label>
             <input className="form-input" name="group_name" placeholder="напр. ИС-202" required value={formData.group_name || ''} onChange={handleChange} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">ФИО Куратора</label>
+            <label className="form-label">{t('register.curator')}</label>
             <input className="form-input" name="curator_name" placeholder="ФИО куратора вашей группы" required value={formData.curator_name || ''} onChange={handleChange} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Номер телефона</label>
+            <label className="form-label">{t('register.phone')}</label>
             <input className="form-input" name="phone" placeholder="+7 (700) 000-00-00" required value={formData.phone || ''} onChange={handleChange} />
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Секция / Кружок</label>
+            <label className="form-label">{t('register.activity')}</label>
             <select className="form-input" name="activity_id" required value={formData.activity_id} onChange={handleChange}>
-              <option value="" disabled style={{ color: '#111', background: '#fff' }}>Выберите направление...</option>
+              <option value="" disabled style={{ color: '#111', background: '#fff' }}>{t('register.activity.select')}</option>
               {activities.map((act) => (
                 <option key={act.id} value={act.id} style={{ color: '#111', background: '#fff' }}>
-                  {act.title} ({act.type === 'section' ? 'Секция' : 'Кружок'})
+                  {act.title} ({act.type === 'section' ? t('nav.sections') : t('nav.clubs')})
                 </option>
               ))}
             </select>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px', padding: '16px', fontSize: '1rem' }} disabled={loading}>
-            {loading ? 'Отправка данных...' : 'Зарегистрироваться'}
+            {loading ? t('register.submitting') : t('register.submit')}
           </button>
         </form>
       </div>

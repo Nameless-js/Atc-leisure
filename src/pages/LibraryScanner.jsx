@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const LibraryScanner = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [scanResult, setScanResult] = useState(null);
 
   useEffect(() => {
@@ -36,14 +38,14 @@ const LibraryScanner = () => {
 
   return (
     <div style={{ textAlign: 'center', padding: '50px', maxWidth: '500px', margin: '0 auto' }}>
-      <h2>Сканирование книги</h2>
-      <p>Наведите камеру на QR-код книги</p>
+      <h2>{t('library.scanner.title')}</h2>
+      <p>{t('library.scanner.subtitle')}</p>
       
       {/* Сюда библиотека встроит интерфейс камеры */}
       <div id="reader" style={{ width: '100%' }}></div>
       
       <button onClick={() => navigate('/')} style={{ marginTop: '20px' }}>
-        Отмена
+        {t('ui.cancel')}
       </button>
     </div>
   );

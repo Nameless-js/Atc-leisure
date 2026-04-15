@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useLanguage } from '../context/LanguageContext';
 
 const LibraryForm = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const bookId = searchParams.get('bookId'); // Тянем ID книги из URL
 
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ const LibraryForm = () => {
       .insert(payload); // Changed from [formData] to formData
 
     if (!error) {
-      alert('Заявка успешно отправлена!');
+      alert(t('msg.success.library'));
       localStorage.setItem('last_student_name', formData.student_name);
       localStorage.setItem('last_group_name', formData.group_name);
       navigate('/');
@@ -50,16 +52,16 @@ const LibraryForm = () => {
       <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <h2 className="section-title" style={{ fontSize: '2rem' }}>
-            <span className="text-gradient-orange">Оформление книги</span>
+            <span className="text-gradient-orange">{t('library.form.title')}</span>
           </h2>
           <p className="section-subtitle" style={{ fontSize: '0.95rem' }}>
-            ID книги: <strong>{bookId}</strong>
+            {t('library.form.bookId')}: <strong>{bookId}</strong>
           </p>
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">ФИО студента (читателя)</label>
+            <label className="form-label">{t('library.form.reader')}</label>
             <input 
               className="form-input"
               name="student_name"
@@ -71,7 +73,7 @@ const LibraryForm = () => {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Группа</label>
+            <label className="form-label">{t('register.group')}</label>
             <input 
               className="form-input"
               name="group_name"
@@ -83,11 +85,11 @@ const LibraryForm = () => {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Название книги</label>
+            <label className="form-label">{t('library.form.bookName')}</label>
             <input 
               className="form-input"
               name="book_name_input"
-              placeholder="Понятное название (например, Физика 10 класс)" 
+              placeholder={t('library.form.bookName.placeholder')} 
               required 
               value={formData.book_name_input || ''}
               onChange={(e) => setFormData({...formData, book_name_input: e.target.value})} 
@@ -95,7 +97,7 @@ const LibraryForm = () => {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Количество экземпляров</label>
+            <label className="form-label">{t('library.form.quantity')}</label>
             <input 
               className="form-input"
               type="number" 
@@ -106,7 +108,7 @@ const LibraryForm = () => {
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px', padding: '16px', fontSize: '1rem' }}>
-            Подтвердить выдачу
+            {t('library.form.submit')}
           </button>
         </form>
       </div>

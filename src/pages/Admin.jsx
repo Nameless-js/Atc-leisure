@@ -3,12 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { QRCodeSVG } from 'qrcode.react';
 import XLSX from 'xlsx-js-style';
+import { useLanguage } from '../context/LanguageContext';
 
 const Admin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  const { t, language } = useLanguage();
   
   // Обновленные табы: 'sections', 'clubs', 'registrations', 'library'
   const [activeTab, setActiveTab] = useState(location.state?.tab || 'sections');
@@ -74,7 +76,7 @@ const Admin = () => {
       window.dispatchEvent(new Event('authChange'));
       navigate('/');
     } else {
-      alert('Неверный пароль');
+      alert(t('ui.not_found'));
     }
   };
 
@@ -136,7 +138,7 @@ const Admin = () => {
     }
     
     if (!error) {
-      alert(isClub ? (editingId ? 'Кружок обновлен!' : 'Кружок успешно добавлен!') : (editingId ? 'Секция обновлена!' : 'Секция успешно добавлена!'));
+      alert(isClub ? (editingId ? t('admin.form.update') : t('msg.success.register')) : (editingId ? t('admin.form.update') : t('msg.success.register')));
       setEditingId(null);
       if (isClub) {
         setNewClub({ title: '', type: 'club', description: '', schedule: '', mentor_name: '', mentor_phone: '', image_url: '' });
@@ -187,7 +189,7 @@ const Admin = () => {
   };
 
   const handleDeleteActivity = async (id, isClub) => {
-    if(!window.confirm('Точно удалить?')) return;
+    if(!window.confirm(t('ui.confirm_delete'))) return;
     const { error } = await supabase.from('activities').delete().eq('id', id);
     if (!error) {
       fetchActivities(isClub ? 'club' : 'section');
@@ -197,7 +199,7 @@ const Admin = () => {
   };
 
   const handleDeleteRegistration = async (id) => {
-    if(!window.confirm('Точно удалить запись студента?')) return;
+    if(!window.confirm(t('ui.confirm_delete'))) return;
     const { error } = await supabase.from('registrations').delete().eq('id', id);
     if (!error) fetchRegistrations();
   };
@@ -278,17 +280,17 @@ const Admin = () => {
   };
 
   const exportToExcel = (data, headerDefs, filename, sheetTitle, accentColor) => {
-    if (data.length === 0) { alert('Нет данных для экспорта'); return; }
+    if (data.length === 0) { alert(t('ui.not_found')); return; }
 
     const keys = Object.keys(headerDefs);
     const headerLabels = Object.values(headerDefs);
 
     // Формируем строку фильтра
     const filterParts = [];
-    if (filterActivity !== 'all') filterParts.push(`Фильтр: ${filterActivity}`);
-    if (filterDateFrom) filterParts.push(`С: ${new Date(filterDateFrom).toLocaleDateString('ru-RU')}`);
-    if (filterDateTo) filterParts.push(`По: ${new Date(filterDateTo).toLocaleDateString('ru-RU')}`);
-    const filterText = filterParts.length > 0 ? filterParts.join(' | ') : 'Все данные (без фильтров)';
+    if (filterActivity !== 'all') filterParts.push(`${t('admin.filter.activity')}: ${filterActivity}`);
+    if (filterDateFrom) filterParts.push(`${t('admin.filter.date_from')}: ${new Date(filterDateFrom).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US')}`);
+    if (filterDateTo) filterParts.push(`${t('admin.filter.date_to')}: ${new Date(filterDateTo).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US')}`);
+    const filterText = filterParts.length > 0 ? filterParts.join(' | ') : t('admin.filter.all');
 
     // Начинаем с пустого массива строк
     const wsData = [];
@@ -299,7 +301,7 @@ const Admin = () => {
     wsData.push(titleRow);
 
     // Строка 1: Дата экспорта + фильтры
-    const dateRow = [{ v: `Дата экспорта: ${new Date().toLocaleDateString('ru-RU')} | ${filterText}`, s: subtitleStyle }];
+    const dateRow = [{ v: `${t('admin.filter.date_from')}: ${new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US')} | ${filterText}`, s: subtitleStyle }];
     for (let i = 1; i < keys.length; i++) dateRow.push({ v: '', s: {} });
     wsData.push(dateRow);
 
@@ -321,7 +323,7 @@ const Admin = () => {
 
     // Строка итого
     wsData.push([]);
-    const totalRow = [{ v: `Всего записей: ${data.length}`, s: { font: { bold: true, sz: 11, name: 'Arial', color: { rgb: '333333' } }, alignment: { horizontal: 'left' } } }];
+    const totalRow = [{ v: `${t('details.participants')}: ${data.length}`, s: { font: { bold: true, sz: 11, name: 'Arial', color: { rgb: '333333' } }, alignment: { horizontal: 'left' } } }];
     wsData.push(totalRow);
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -363,12 +365,12 @@ const Admin = () => {
       description: a.description || ''
     }));
     exportToExcel(rows, {
-      title: 'Название',
-      schedule: 'Расписание',
-      mentor_name: 'Тренер',
-      mentor_phone: 'Контакты',
-      description: 'Описание'
-    }, 'Спортивные_секции.xlsx', '🏀 Спортивные секции — КИТ', 'E87722');
+      title: t('admin.form.title'),
+      schedule: t('admin.form.schedule'),
+      mentor_name: t('admin.form.mentor'),
+      mentor_phone: t('admin.form.phone'),
+      description: t('admin.form.description')
+    }, `Sections_${language}.xlsx`, `${t('admin.tab.sections')} — ATC`, 'E87722');
   };
 
   const handleExportClubs = () => {
@@ -380,12 +382,12 @@ const Admin = () => {
       description: a.description || ''
     }));
     exportToExcel(rows, {
-      title: 'Кружок',
-      schedule: 'Встречи',
-      mentor_name: 'Руководитель',
-      mentor_phone: 'Контакты',
-      description: 'Описание'
-    }, 'Творческие_кружки.xlsx', '🎨 Творческие кружки — КИТ', '7B2D8B');
+      title: t('admin.form.title'),
+      schedule: t('admin.form.schedule'),
+      mentor_name: t('admin.form.mentor'),
+      mentor_phone: t('admin.form.phone'),
+      description: t('admin.form.description')
+    }, `Clubs_${language}.xlsx`, `${t('admin.tab.clubs')} — ATC`, '7B2D8B');
   };
 
   const handleExportRegistrations = () => {
@@ -396,11 +398,11 @@ const Admin = () => {
       date: new Date(r.created_at).toLocaleDateString('ru-RU')
     }));
     exportToExcel(rows, {
-      student_name: 'Студент',
-      group_name: 'Группа',
-      activity: 'Выбранное направление',
-      date: 'Дата записи'
-    }, 'Журнал_записей.xlsx', '📋 Электронный журнал записей — КИТ', '0284C7');
+      student_name: t('register.student'),
+      group_name: t('register.group'),
+      activity: t('admin.filter.activity'),
+      date: t('admin.filter.date_from')
+    }, `Journal_${language}.xlsx`, `${t('admin.tab.journal')} — ATC`, '0284C7');
   };
 
   const handleExportLibrary = () => {
@@ -414,14 +416,14 @@ const Admin = () => {
       status: r.is_returned ? 'Возвращена' : 'На руках'
     }));
     exportToExcel(rows, {
-      student_name: 'Студент',
-      group_name: 'Группа',
-      book_name: 'Название Книги',
-      book_id: 'Код (ID)',
-      quantity: 'Кол-во',
-      date: 'Дата и Время',
-      status: 'Статус'
-    }, 'История_выдачи_книг.xlsx', '📚 Журнал библиотеки — КИТ', '10b981');
+      student_name: t('register.student'),
+      group_name: t('register.group'),
+      book_name: t('library.form.bookName'),
+      book_id: t('library.form.bookId'),
+      quantity: t('library.form.quantity'),
+      date: t('admin.filter.date_from'),
+      status: t('admin.filter.status')
+    }, `Library_History_${language}.xlsx`, `${t('admin.tab.library_history')} — ATC`, '10b981');
   };
 
   // === СТИЛИ ФИЛЬТР-ПАНЕЛИ ===
@@ -534,13 +536,13 @@ const Admin = () => {
             value={filterActivity} 
             onChange={e => setFilterActivity(e.target.value)}
           >
-            <option value="all">Все</option>
+            <option value="all">{t('admin.filter.all')}</option>
             {uniqueTitles.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
 
         <div style={filterGroupStyle}>
-          <label style={filterLabelStyle}>📅 Дата с</label>
+          <label style={filterLabelStyle}>📅 {t('admin.filter.date_from')}</label>
           <input 
             type="date" 
             style={filterInputStyle} 
@@ -550,7 +552,7 @@ const Admin = () => {
         </div>
 
         <div style={filterGroupStyle}>
-          <label style={filterLabelStyle}>📅 Дата по</label>
+          <label style={filterLabelStyle}>📅 {t('admin.filter.date_to')}</label>
           <input 
             type="date" 
             style={filterInputStyle} 
@@ -586,9 +588,9 @@ const Admin = () => {
     return (
       <div className="page-wrapper container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <form onSubmit={handleLogin} className="glass-card" style={{ width: '100%', maxWidth: '400px' }}>
-          <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Вход для персонала</h2>
+          <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>{t('admin.login_title')}</h2>
           <div className="form-group">
-            <label className="form-label">Пароль (demo: admin123)</label>
+            <label className="form-label">{t('admin.password_label')}</label>
             <input 
               type="password" 
               className="form-input" 
@@ -596,7 +598,7 @@ const Admin = () => {
               onChange={e => setPassword(e.target.value)} 
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Войти</button>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>{t('admin.login_btn')}</button>
         </form>
       </div>
     );
@@ -605,19 +607,19 @@ const Admin = () => {
   return (
     <div className="page-wrapper container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h2>Панель управления</h2>
+        <h2>{t('admin.title')}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn btn-outline btn-sm" onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>← На главную</button>
-          <button className="btn btn-danger btn-sm" onClick={handleLogout}>Выйти из аккаунта</button>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>← {t('nav.main')}</button>
+          <button className="btn btn-danger btn-sm" onClick={handleLogout}>{t('admin.logout_btn')}</button>
         </div>
       </div>
 
       <div className="tabs-container">
-        <button className={`tab-button ${activeTab === 'sections' ? 'active' : ''}`} onClick={() => setActiveTab('sections')}>🏀 Спортивные Секции</button>
-        <button className={`tab-button ${activeTab === 'clubs' ? 'active' : ''}`} onClick={() => setActiveTab('clubs')}>🎨 Творческие Кружки</button>
-        <button className={`tab-button ${activeTab === 'registrations' ? 'active' : ''}`} onClick={() => setActiveTab('registrations')}>Электронный Журнал Записей</button>
-        <button className={`tab-button ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}>Библиотека (QR)</button>
-        <button className={`tab-button ${activeTab === 'library_history' ? 'active' : ''}`} onClick={() => setActiveTab('library_history')}>📚 История Библиотеки</button>
+        <button className={`tab-button ${activeTab === 'sections' ? 'active' : ''}`} onClick={() => setActiveTab('sections')}>{t('admin.tab.sections')}</button>
+        <button className={`tab-button ${activeTab === 'clubs' ? 'active' : ''}`} onClick={() => setActiveTab('clubs')}>{t('admin.tab.clubs')}</button>
+        <button className={`tab-button ${activeTab === 'registrations' ? 'active' : ''}`} onClick={() => setActiveTab('registrations')}>{t('admin.tab.journal')}</button>
+        <button className={`tab-button ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}>{t('admin.tab.library')}</button>
+        <button className={`tab-button ${activeTab === 'library_history' ? 'active' : ''}`} onClick={() => setActiveTab('library_history')}>{t('admin.tab.library_history')}</button>
       </div>
 
       {/* ВКЛАДКА: СЕКЦИИ */}
@@ -626,46 +628,46 @@ const Admin = () => {
           {renderFilterPanel('sections')}
 
           <form className="glass-card" onSubmit={(e) => handleCreateActivity(e, false)} style={{ marginBottom: '30px', borderTop: '4px solid #E87722' }}>
-            <h3 style={{ marginBottom: '20px' }}>{editingId ? 'Редактирование Секции' : 'Регистрация Новой Секции'}</h3>
+            <h3 style={{ marginBottom: '20px' }}>{editingId ? t('admin.form.update') : t('admin.form.create')}</h3>
             <div className="cards-grid">
               <div className="form-group">
-                <label className="form-label">Название секции (например, Волейбол)</label>
+                <label className="form-label">{t('admin.form.title')}</label>
                 <input required className="form-input" value={newSection.title} onChange={e => setNewSection({...newSection, title: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Дни проведения и время</label>
+                <label className="form-label">{t('admin.form.schedule')}</label>
                 <input className="form-input" placeholder="Пн, Ср, Пт 18:00" value={newSection.schedule} onChange={e => setNewSection({...newSection, schedule: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Тренер (ФИО)</label>
+                <label className="form-label">{t('admin.form.mentor')}</label>
                 <input className="form-input" value={newSection.mentor_name} onChange={e => setNewSection({...newSection, mentor_name: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Контакты тренера</label>
+                <label className="form-label">{t('admin.form.phone')}</label>
                 <input className="form-input" value={newSection.mentor_phone} onChange={e => setNewSection({...newSection, mentor_phone: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">Аватар карточки (URL-адрес картинки, необязательно)</label>
+                <label className="form-label">{t('admin.form.image')}</label>
                 <input className="form-input" placeholder="https://..." value={newSection.image_url} onChange={e => setNewSection({...newSection, image_url: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">Краткое описание секции</label>
+                <label className="form-label">{t('admin.form.description')}</label>
                 <textarea className="form-input" value={newSection.description} onChange={e => setNewSection({...newSection, description: e.target.value})} rows="2" />
               </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button type="submit" className="btn btn-primary" style={{ background: '#E87722', border: 'none', boxShadow: 'none' }}>
-                {editingId ? 'Сохранить изменения' : 'Создать секцию'}
+                {editingId ? t('ui.save') : t('admin.form.create')}
               </button>
               {editingId && (
-                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(false)}>Отмена</button>
+                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(false)}>{t('ui.cancel')}</button>
               )}
             </div>
           </form>
 
           <div className="table-wrapper">
             <table className="admin-table">
-              <thead><tr><th>Название</th><th>Расписание</th><th>Тренер</th><th>Действия</th></tr></thead>
+              <thead><tr><th>{t('admin.form.title')}</th><th>{t('admin.form.schedule')}</th><th>{t('admin.form.mentor')}</th><th>{t('ui.edit')}</th></tr></thead>
               <tbody>
                 {filteredActivities.map(a => (
                   <tr key={a.id}>
@@ -674,13 +676,13 @@ const Admin = () => {
                     <td>{a.mentor_name}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, false)}>Изменить</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, false)}>Удалить</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, false)}>{t('ui.edit')}</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, false)}>{t('ui.delete')}</button>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>Нет созданных секций</td></tr>}
+                {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>{t('ui.not_found')}</td></tr>}
               </tbody>
             </table>
           </div>
@@ -693,46 +695,46 @@ const Admin = () => {
           {renderFilterPanel('clubs')}
 
           <form className="glass-card" onSubmit={(e) => handleCreateActivity(e, true)} style={{ marginBottom: '30px', borderTop: '4px solid #9D4EDD' }}>
-            <h3 style={{ marginBottom: '20px' }}>{editingId ? 'Редактирование Кружка' : 'Открытие Нового Кружка'}</h3>
+            <h3 style={{ marginBottom: '20px' }}>{editingId ? t('admin.form.update') : t('admin.form.create')}</h3>
             <div className="cards-grid">
               <div className="form-group">
-                <label className="form-label">Название кружка (например, Робототехника)</label>
+                <label className="form-label">{t('admin.form.title')}</label>
                 <input required className="form-input" value={newClub.title} onChange={e => setNewClub({...newClub, title: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Дни встреч</label>
+                <label className="form-label">{t('admin.form.schedule')}</label>
                 <input className="form-input" placeholder="Вторник, Четверг 16:30" value={newClub.schedule} onChange={e => setNewClub({...newClub, schedule: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Руководитель (ФИО)</label>
+                <label className="form-label">{t('admin.form.mentor')}</label>
                 <input className="form-input" value={newClub.mentor_name} onChange={e => setNewClub({...newClub, mentor_name: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Контакты руководителя</label>
+                <label className="form-label">{t('admin.form.phone')}</label>
                 <input className="form-input" value={newClub.mentor_phone} onChange={e => setNewClub({...newClub, mentor_phone: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">Аватар карточки (URL-адрес картинки, необязательно)</label>
+                <label className="form-label">{t('admin.form.image')}</label>
                 <input className="form-input" placeholder="https://..." value={newClub.image_url} onChange={e => setNewClub({...newClub, image_url: e.target.value})} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">Концепция кружка (описание)</label>
+                <label className="form-label">{t('admin.form.description')}</label>
                 <textarea className="form-input" value={newClub.description} onChange={e => setNewClub({...newClub, description: e.target.value})} rows="2" />
               </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button type="submit" className="btn btn-primary" style={{ background: '#9D4EDD', border: 'none', boxShadow: 'none' }}>
-                {editingId ? 'Сохранить изменения' : 'Создать кружок'}
+                {editingId ? t('ui.save') : t('admin.form.create')}
               </button>
               {editingId && (
-                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(true)}>Отмена</button>
+                <button type="button" className="btn btn-outline" onClick={() => cancelEdit(true)}>{t('ui.cancel')}</button>
               )}
             </div>
           </form>
 
           <div className="table-wrapper">
             <table className="admin-table">
-              <thead><tr><th>Кружок</th><th>Встречи</th><th>Руководитель</th><th>Действия</th></tr></thead>
+              <thead><tr><th>{t('admin.tab.clubs')}</th><th>{t('admin.form.schedule')}</th><th>{t('admin.form.mentor')}</th><th>{t('ui.edit')}</th></tr></thead>
               <tbody>
                 {filteredActivities.map(a => (
                   <tr key={a.id}>
@@ -741,13 +743,13 @@ const Admin = () => {
                     <td>{a.mentor_name}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, true)}>Изменить</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, true)}>Удалить</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleEditActivity(a, true)}>{t('ui.edit')}</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteActivity(a.id, true)}>{t('ui.delete')}</button>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>Нет созданных кружков</td></tr>}
+                {filteredActivities.length === 0 && <tr><td colSpan="4" style={{textAlign: 'center'}}>{t('ui.not_found')}</td></tr>}
               </tbody>
             </table>
           </div>
@@ -763,11 +765,11 @@ const Admin = () => {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Студент</th>
-                  <th>Группа</th>
-                  <th>Выбранное Направление</th>
-                  <th>Дата записи</th>
-                  <th>Действия</th>
+                  <th>{t('register.student')}</th>
+                  <th>{t('register.group')}</th>
+                  <th>{t('admin.filter.activity')}</th>
+                  <th>{t('admin.filter.date_from')}</th>
+                  <th>{t('ui.delete')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -778,11 +780,11 @@ const Admin = () => {
                     <td><span style={{background: 'rgba(0, 209, 178, 0.1)', color: '#00d1b2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>{r.activities?.title || '—'}</span></td>
                     <td>{new Date(r.created_at).toLocaleDateString()}</td>
                     <td>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRegistration(r.id)}>Исключить</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRegistration(r.id)}>{t('ui.delete')}</button>
                     </td>
                   </tr>
                 ))}
-                {filteredRegistrations.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>Нет данных</td></tr>}
+                {filteredRegistrations.length === 0 && <tr><td colSpan="5" style={{textAlign: 'center'}}>{t('ui.not_found')}</td></tr>}
               </tbody>
             </table>
           </div>
@@ -793,7 +795,7 @@ const Admin = () => {
       {activeTab === 'library' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
           <div className="glass-card">
-            <h3 style={{ marginBottom: '20px' }}>Генератор QR (Для Книги)</h3>
+            <h3 style={{ marginBottom: '20px' }}>{t('admin.tab.library')}</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
               Превратите код книги в QR для наклейки. Студенты сканируют такие наклейки, оформляя конкретную книгу.
             </p>
@@ -816,13 +818,13 @@ const Admin = () => {
           </div>
           
           <div className="glass-card">
-             <h3 style={{ marginBottom: '20px' }}>QR Библиотеки (Общий)</h3>
+             <h3 style={{ marginBottom: '20px' }}>QR {t('nav.teacher')}</h3>
              <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
                Распечатайте этот QR для сканера на входе или кафедре. Он ведет на главную страницу библиотеки со сканером.
              </p>
              <div className="qr-container">
                 <QRCodeSVG value={window.location.origin + '/library'} size={220} level="Q" includeMargin={true} />
-                <p style={{ marginTop: '16px', fontWeight: 'bold', color: '#1a1a1a', letterSpacing: '1px' }}>Общий вход в сканер</p>
+                <p style={{ marginTop: '16px', fontWeight: 'bold', color: '#1a1a1a', letterSpacing: '1px' }}>{t('library.scanner.title')}</p>
              </div>
           </div>
         </div>
@@ -834,18 +836,18 @@ const Admin = () => {
           {renderFilterPanel('library_history')}
           
           <div className="glass-card" style={{ padding: '30px' }}>
-            <h3 style={{ marginBottom: '20px' }}>История выдачи книг</h3>
+            <h3 style={{ marginBottom: '20px' }}>{t('admin.tab.library_history')}</h3>
             <div className="table-wrapper">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>ФИО</th>
-                    <th>Группа</th>
-                    <th>Книга / Код</th>
-                    <th>Кол-во</th>
-                    <th>Дата и Время</th>
-                    <th>Статус</th>
-                    <th>Действия</th>
+                    <th>{t('register.student')}</th>
+                    <th>{t('register.group')}</th>
+                    <th>{t('library.form.bookName')} / {t('library.form.bookId')}</th>
+                    <th>{t('library.form.quantity')}</th>
+                    <th>{t('admin.filter.date_from')}</th>
+                    <th>{t('admin.filter.status')}</th>
+                    <th>{t('ui.edit')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -859,23 +861,23 @@ const Admin = () => {
                           <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{r.book_id}</span>
                         </div>
                       </td>
-                      <td>{r.quantity} шт.</td>
-                      <td>{new Date(r.created_at).toLocaleString('ru-RU')}</td>
+                      <td>{r.quantity}</td>
+                      <td>{new Date(r.created_at).toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US')}</td>
                       <td>
                         {r.is_returned ? 
-                          <span style={{background: 'rgba(0, 209, 178, 0.1)', color: '#00d1b2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>Возвращена</span> : 
-                          <span style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>На руках</span>
+                          <span style={{background: 'rgba(0, 209, 178, 0.1)', color: '#00d1b2', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>{t('admin.status.returned')}</span> : 
+                          <span style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem'}}>{t('admin.status.on_hand')}</span>
                         }
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          <button className="btn btn-sm" style={{ background: 'rgba(0, 209, 178, 0.2)', color: '#00d1b2', border: '1px solid rgba(0, 209, 178, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, true)}>Вернул</button>
-                          <button className="btn btn-sm" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, false)}>Отмена</button>
+                          <button className="btn btn-sm" style={{ background: 'rgba(0, 209, 178, 0.2)', color: '#00d1b2', border: '1px solid rgba(0, 209, 178, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, true)}>{t('admin.action.return')}</button>
+                          <button className="btn btn-sm" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => handleUpdateLibraryStatus(r.id, false)}>{t('ui.cancel')}</button>
                         </div>
                       </td>
                     </tr>
                   ))}
-                  {filteredLibraryRequests.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center'}}>Нет записей о выдаче книг</td></tr>}
+                  {filteredLibraryRequests.length === 0 && <tr><td colSpan="7" style={{textAlign: 'center'}}>{t('ui.not_found')}</td></tr>}
                 </tbody>
               </table>
             </div>
