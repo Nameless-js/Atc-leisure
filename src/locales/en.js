@@ -139,7 +139,7 @@ export const en = {
 
   "admin.title": "Control Panel",
   "admin.login_title": "Staff Login",
-  "admin.password_label": "Password (demo: admin123)",
+  "admin.password_label": "Password",
   "admin.login_btn": "Login",
   "admin.logout_btn": "Logout",
   "admin.tab.sections": "🏀 Sports Sections",

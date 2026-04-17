@@ -142,7 +142,7 @@ export const ru = {
 
   "admin.title": "Панель управления",
   "admin.login_title": "Вход для персонала",
-  "admin.password_label": "Пароль (demo: admin123)",
+  "admin.password_label": "Пароль",
   "admin.login_btn": "Войти",
   "admin.logout_btn": "Выйти из аккаунта",
   "admin.tab.sections": "🏀 Спортивные Секции",

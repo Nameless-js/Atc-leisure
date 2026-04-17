@@ -139,7 +139,7 @@ export const kz = {
 
   "admin.title": "Басқару панелі",
   "admin.login_title": "Персонал үшін кіру",
-  "admin.password_label": "Құпия сөз (demo: admin123)",
+  "admin.password_label": "Құпия сөз",
   "admin.login_btn": "Кіру",
   "admin.logout_btn": "Аккаунттан шығу",
   "admin.tab.sections": "🏀 Спортық Секциялар",
