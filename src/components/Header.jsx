@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [isTeacher, setIsTeacher] = useState(false);
   const { t, language, setLanguage } = useLanguage();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -15,19 +16,17 @@ const Header = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Проверяем авторизацию учителя при каждом изменении маршрута
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsTeacher(sessionStorage.getItem('adminAuth') === 'true');
-    };
-    checkAuth();
-    // Слушаем кастомное событие для обновления состояния хедера
-    window.addEventListener('authChange', checkAuth);
-    return () => window.removeEventListener('authChange', checkAuth);
-  }, [location.pathname]);
-
   const isHome = location.pathname === '/';
   const isAdmin = location.pathname === '/admin';
+  const isAuth = location.pathname === '/auth';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Get display name from user metadata
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
 
   return (
     <header className="header" style={{ boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.5)' : 'none' }}>
@@ -57,7 +56,7 @@ const Header = () => {
           <option value="en" style={{color: '#000'}}>EN</option>
         </select>
 
-        {!isHome && !isAdmin && (
+        {!isHome && !isAdmin && !isAuth && (
           <button
             className="btn btn-outline btn-sm"
             onClick={() => navigate('/')}
@@ -66,29 +65,45 @@ const Header = () => {
           </button>
         )}
 
-        {isTeacher ? (
-          <>
-            {!isAdmin && (
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => navigate('/admin')}
-                style={{ 
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
-                  boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
-                }}
-              >
-                ⚙️ Админ Панель
-              </button>
-            )}
-          </>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ 
+              fontSize: '0.88rem', 
+              color: 'var(--text-secondary)',
+              maxWidth: '120px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              👤 {displayName}
+            </span>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={handleSignOut}
+              style={{
+                fontSize: '0.82rem',
+                padding: '6px 14px',
+                borderColor: 'rgba(239, 68, 68, 0.4)',
+                color: '#ef4444',
+              }}
+            >
+              {t('auth.btn.logout')}
+            </button>
+          </div>
         ) : (
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => navigate('/admin')}
-          >
-            🔐 {t('nav.teacher')}
-          </button>
+          !isAuth && (
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate('/auth')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
+                boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
+              }}
+            >
+              🔐 {t('auth.btn.header_login')}
+            </button>
+          )
         )}
       </nav>
     </header>

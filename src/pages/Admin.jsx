@@ -74,7 +74,6 @@ const Admin = () => {
       setIsAuthenticated(true);
       sessionStorage.setItem('adminAuth', 'true');
       window.dispatchEvent(new Event('authChange'));
-      navigate('/');
     } else {
       alert(t('ui.not_found'));
     }
@@ -147,9 +146,13 @@ const Admin = () => {
       }
       fetchActivities(isClub ? 'club' : 'section');
     } else {
-      // Если ОШИБКА RLS или другая:
       console.error("Ошибка БД:", error);
-      alert(`Ошибка БД!\nКод: ${error.code}\nТекст: ${error.message}\nЕсли RLS включено, отключите его или создайте Policy.`);
+      const isFailedToFetch = error.message === 'Failed to fetch' || error.message?.includes('Failed to fetch');
+      if (isFailedToFetch) {
+        alert(`Ошибка сети (Failed to fetch).\n\nПричина: Скорее всего, в файле .env указан неверный VITE_SUPABASE_ANON_KEY.\nУбедитесь, что ключ правильный и начинается с "eyJ...". Ключи, начинающиеся с "sb_publishable", не подходят.`);
+      } else {
+        alert(`Ошибка БД!\nКод: ${error?.code || 'Неизвестно'}\nТекст: ${error?.message || 'Неизвестная ошибка'}\nЕсли RLS включено, отключите его или создайте Policy.`);
+      }
     }
   };
 

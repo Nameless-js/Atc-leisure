@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
 
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -10,48 +11,54 @@ import LibraryScanner from './pages/LibraryScanner';
 import LibraryForm from './pages/LibraryForm';
 import Admin from './pages/Admin';
 import ActivityDetail from './pages/ActivityDetail';
+import AuthPage from './pages/AuthPage';
 import { useLanguage } from './context/LanguageContext';
 
 function App() {
   const { t } = useLanguage();
   return (
     <LanguageProvider>
-      <Router>
-      {/* Animated background layers */}
-      <div className="bg-grid" />
-      <div className="bg-animated">
-        <div className="bg-orb3" />
-      </div>
+      <AuthProvider>
+        <Router>
+        {/* Animated background layers */}
+        <div className="bg-grid" />
+        <div className="bg-animated">
+          <div className="bg-orb3" />
+        </div>
 
-      {/* Sticky header */}
-      <Header />
+        {/* Sticky header */}
+        <Header />
 
-      {/* Page content */}
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
+        {/* Page content */}
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
 
-          <Route path="/sections" element={<Activities type="section" />} />
-          <Route path="/clubs"    element={<Activities type="club" />} />
-          <Route path="/activity/:id" element={<ActivityDetail />} />
+            <Route path="/sections" element={<Activities type="section" />} />
+            <Route path="/clubs"    element={<Activities type="club" />} />
+            <Route path="/activity/:id" element={<ActivityDetail />} />
 
-          <Route path="/register"      element={<Register />} />
-          <Route path="/library"       element={<LibraryScanner />} />
-          <Route path="/library-form"  element={<LibraryForm />} />
-          
-          {/* Админ-панель */}
-          <Route path="/admin"         element={<Admin />} />
-        </Routes>
-      </main>
+            <Route path="/register"      element={<Register />} />
+            <Route path="/library"       element={<LibraryScanner />} />
+            <Route path="/library-form"  element={<LibraryForm />} />
+            
+            {/* Авторизация пользователей */}
+            <Route path="/auth"          element={<AuthPage />} />
 
-      {/* Footer */}
-      <footer className="footer">
-        <span className="footer-brand">
-           <span>EduSpace</span> — {t('home.hero.badge').split(' — ')[0]}
-        </span>
-        <span className="footer-copy">© {new Date().getFullYear()} {t('footer.rights')}</span>
-      </footer>
-      </Router>
+            {/* Админ-панель */}
+            <Route path="/admin"         element={<Admin />} />
+          </Routes>
+        </main>
+
+        {/* Footer */}
+        <footer className="footer">
+          <span className="footer-brand">
+             <span>EduSpace</span> — {t('home.hero.badge').split(' — ')[0]}
+          </span>
+          <span className="footer-copy">© {new Date().getFullYear()} {t('footer.rights')}</span>
+        </footer>
+        </Router>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

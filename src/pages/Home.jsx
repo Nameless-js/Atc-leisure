@@ -109,10 +109,7 @@ const Home = () => {
           <button 
             className="btn btn-outline" 
             style={{ fontSize: '1.05rem', padding: '16px 36px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
-            onClick={() => {
-              if (sessionStorage.getItem('adminAuth') === 'true') navigate('/admin', { state: { tab: 'library' } });
-              else navigate('/library');
-            }}
+            onClick={() => navigate('/library')}
           >
             <img src="/images/books.png" alt="Библиотека" style={{ width: '20px', height: '20px', objectFit: 'contain' }} /> {t('home.hero.btnLibrary')}
           </button>
@@ -150,10 +147,7 @@ const Home = () => {
             <p className="feature-text">{t('home.feat2.text')}</p>
           </div>
 
-          <div className="feature-card reveal stagger-3" onClick={() => {
-              if (sessionStorage.getItem('adminAuth') === 'true') navigate('/admin', { state: { tab: 'library' } });
-              else navigate('/library');
-            }}>
+          <div className="feature-card reveal stagger-3" onClick={() => navigate('/library')}>
             <div className="feature-icon feature-icon-teal">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
@@ -399,10 +393,7 @@ const Home = () => {
             <button className="btn btn-primary" style={{ fontSize: '1.05rem', padding: '16px 36px' }} onClick={() => navigate('/sections')}>
               {t('home.cta.btn1')}
             </button>
-            <button className="btn btn-outline" style={{ fontSize: '1.05rem', padding: '16px 36px' }} onClick={() => {
-              if (sessionStorage.getItem('adminAuth') === 'true') navigate('/admin', { state: { tab: 'library' } });
-              else navigate('/library');
-            }}>
+            <button className="btn btn-outline" style={{ fontSize: '1.05rem', padding: '16px 36px' }} onClick={() => navigate('/library')}>
               {t('home.cta.btn2')}
             </button>
           </div>
